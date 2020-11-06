@@ -23,8 +23,17 @@ namespace Commander
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<CommanderContext>(opt => opt.UseSqlServer
-                (Configuration.GetConnectionString("CommanderConnection")));
+            var server = Configuration["DBServer"] ?? "ms-sql-server";
+            var port = Configuration["DBPort"] ?? "1433";
+            var user = Configuration["DBUser"] ?? "SA";
+            var password = Configuration["DBPassword"] ?? "Pa55w0rd2020";
+            var database = Configuration["Database"] ?? "CommanderDB";
+
+            services.AddDbContext<CommanderContext>(opt => opt.UseSqlServer(
+                $"Server={server},{port};Initial Catalog={database};User id={user};Password={password}"));
+
+            //services.AddDbContext<CommanderContext>(opt => opt.UseSqlServer
+            //    (Configuration.GetConnectionString("CommanderConnection")));
 
             services.AddControllers().AddNewtonsoftJson(s =>
             {
@@ -54,6 +63,8 @@ namespace Commander
             {
                 endpoints.MapControllers();
             });
+
+            PrepDB.PrepPopulation(app);
         }
     }
 }
